@@ -1,9 +1,12 @@
 class LRU(object):
     def __init__(self, capacity):
         self.capacity= capacity
-        self.head= None
-        self.end= None
         self.pairs= {}
+        
+        self.head= self._dlList_(None)
+        self.end= self._dlList_(None)
+        self.head.nxt= self.end
+        self.end.prv= self.head
 
 
     class _dlList_(object):
@@ -53,23 +56,15 @@ class LRU(object):
             self.pairs[key][0]= value
             # if storage takes time, check bef assign
         else:
+            if len(self.pairs) == self.capacity:
+                rmkey= self.end.prv.val
+                del self.pairs[rmkey]
+                self.end.prv= self.end.prv.prv
+                self.end.prv.nxt= self.end
+            
             node= self._dlList_(key)
             self.pairs[key]= [value, node]
-
-            if len(self.pairs)==1:
-                self.head= self._dlList_(None)
-                self.end= self._dlList_(None)
-                self.head.nxt= node
-                self.end.prv= node
-                node.prv= self.head
-                node.nxt= self.end
-            else:
-                if len(self.pairs) > self.capacity:
-                    rmkey= self.end.prv.val
-                    del self.pairs[rmkey]
-                    self.end.prv= self.end.prv.prv
-                    self.end.prv.nxt= self.end
-                node.prv= self.head
-                node.nxt= self.head.nxt
-                self.head.nxt.prv= node
-                self.head.nxt= node
+            node.prv= self.head
+            node.nxt= self.head.nxt
+            self.head.nxt.prv= node
+            self.head.nxt= node
